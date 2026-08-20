@@ -11,7 +11,12 @@
                                 Username
                             </label>
 
-                            <input id="username" v-model="formData.username" type="text" class="form-control">
+                            <input id="username" v-model="formData.username" type="text" class="form-control"
+                                @blur="validateName(true)" @input="validateName(false)">
+
+                            <div v-if="errors.username" class="text-danger">
+                                {{ errors.username }}
+                            </div>
                         </div>
 
                         <div class="col-sm-6">
@@ -19,7 +24,11 @@
                                 Password
                             </label>
 
-                            <input id="password" v-model="formData.password" type="password" class="form-control">
+                            <input id="password" v-model="formData.password" type="password" class="form-control"
+                                @blur="validatePassword(true)" @input="validatePassword(false)">
+                            <div v-if="errors.password" class="text-danger">
+                                {{ errors.password }}
+                            </div>
                         </div>
                     </div>
 
@@ -27,7 +36,11 @@
                         <div class="col-sm-6">
                             <div class="form-check">
                                 <input id="isAustralian" v-model="formData.isAustralian" type="checkbox"
-                                    class="form-check-input">
+                                    class="form-check-input" @change="validateResident(true)">
+
+                                <div v-if="errors.resident" class="text-danger">
+                                    {{ errors.resident }}
+                                </div>
 
                                 <label class="form-check-label" for="isAustralian">
                                     Australian Resident?
@@ -40,11 +53,17 @@
                                 Gender
                             </label>
 
-                            <select id="gender" v-model="formData.gender" class="form-select">
+                            <select id="gender" v-model="formData.gender" class="form-select"
+                                @blur="validateGender(true)" @change="validateGender(false)">
+                                <option value="" disabled>Please select a gender</option>
                                 <option value="male">Male</option>
                                 <option value="female">Female</option>
                                 <option value="other">Other</option>
                             </select>
+
+                            <div v-if="errors.gender" class="text-danger">
+                                {{ errors.gender }}
+                            </div>
                         </div>
                     </div>
 
@@ -53,7 +72,12 @@
                             Reason for joining
                         </label>
 
-                        <textarea id="reason" v-model="formData.reason" class="form-control" rows="3"></textarea>
+                        <textarea id="reason" v-model="formData.reason" class="form-control" rows="3"
+                            @blur="validateReason(true)" @input="validateReason(false)"></textarea>
+
+                        <div v-if="errors.reason" class="text-danger">
+                            {{ errors.reason }}
+                        </div>
                     </div>
 
                     <div class="text-center">
@@ -66,9 +90,23 @@
                         </button>
                     </div>
                 </form>
+                <DataTable v-if="submittedCards.length > 0" :value="submittedCards" class="mt-5"
+                    tableStyle="min-width: 50rem">
+                    <Column field="username" header="Username" />
+                    <Column field="password" header="Password" />
+
+                    <Column header="Australian Resident">
+                        <template #body="{ data }">
+                            {{ data.isAustralian ? 'Yes' : 'No' }}
+                        </template>
+                    </Column>
+
+                    <Column field="gender" header="Gender" />
+                    <Column field="reason" header="Reason" />
+                </DataTable>
             </div>
         </div>
-        <div class="row mt-5" v-if="submittedCards.length">
+        <!-- <div class="row mt-5" v-if="submittedCards.length">
             <div class="d-flex flex-wrap justify-content-start">
                 <div v-for="(card, index) in submittedCards" :key="index" class="card m-2" style="width: 18rem;">
                     <div class="card-header">
@@ -84,13 +122,14 @@
                     </ul>
                 </div>
             </div>
-        </div>
+        </div> -->
     </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
-
+import DataTable from 'primevue/datatable'
+import Column from 'primevue/column'
 const formData = ref({
     username: '',
     password: '',
@@ -102,9 +141,23 @@ const formData = ref({
 const submittedCards = ref([])
 
 const submitForm = () => {
-    submittedCards.value.push({
-        ...formData.value,
-    })
+    validateName(true)
+    validatePassword(true)
+    validateResident(true)
+    validateGender(true)
+    validateReason(true)
+
+    const isValid = Object.values(errors.value).every(
+        (error) => !error
+    )
+
+    if (isValid) {
+        submittedCards.value.push({
+            ...formData.value,
+        })
+
+        clearForm()
+    }
 }
 
 const clearForm = () => {
@@ -114,6 +167,96 @@ const clearForm = () => {
         isAustralian: false,
         reason: '',
         gender: '',
+    }
+}
+const errors = ref({
+    username: null,
+    password: null,
+    resident: null,
+    gender: null,
+    reason: null,
+})
+
+const validateName = (blur) => {
+    if (formData.value.username.length < 3) {
+        if (blur) {
+            errors.value.username =
+                'Name must be at least 3 characters'
+        }
+    } else {
+        errors.value.username = null
+    }
+}
+const validatePassword = (blur) => {
+    const password = formData.value.password
+    const minLength = 8
+    const hasUppercase = /[A-Z]/.test(password)
+    const hasLowercase = /[a-z]/.test(password)
+    const hasNumber = /\d/.test(password)
+    const hasSpecialChar =
+        /[!@#$%^&*(),.?":{}|<>]/.test(password)
+
+    if (password.length < minLength) {
+        if (blur) {
+            errors.value.password =
+                `Password must be at least ${minLength} characters long.`
+        }
+    } else if (!hasUppercase) {
+        if (blur) {
+            errors.value.password =
+                'Password must contain at least one uppercase letter.'
+        }
+    } else if (!hasLowercase) {
+        if (blur) {
+            errors.value.password =
+                'Password must contain at least one lowercase letter.'
+        }
+    } else if (!hasNumber) {
+        if (blur) {
+            errors.value.password =
+                'Password must contain at least one number.'
+        }
+    } else if (!hasSpecialChar) {
+        if (blur) {
+            errors.value.password =
+                'Password must contain at least one special character.'
+        }
+    } else {
+        errors.value.password = null
+    }
+}
+const validateResident = (blur) => {
+    if (!formData.value.isAustralian) {
+        if (blur) {
+            errors.value.resident =
+                'Australian residency must be confirmed.'
+        }
+    } else {
+        errors.value.resident = null
+    }
+}
+
+const validateGender = (blur) => {
+    if (!formData.value.gender) {
+        if (blur) {
+            errors.value.gender =
+                'Please select a gender.'
+        }
+    } else {
+        errors.value.gender = null
+    }
+}
+
+const validateReason = (blur) => {
+    const reason = formData.value.reason.trim()
+
+    if (reason.length < 10) {
+        if (blur) {
+            errors.value.reason =
+                'Reason must be at least 10 characters.'
+        }
+    } else {
+        errors.value.reason = null
     }
 }
 </script>
