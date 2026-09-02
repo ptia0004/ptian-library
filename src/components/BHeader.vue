@@ -1,19 +1,46 @@
+<script setup>
+import { useRouter } from 'vue-router'
+import { isAuthenticated, logout } from '../auth'
+
+const router = useRouter()
+
+const handleLogout = () => {
+  logout()
+  router.push('/login')
+}
+</script>
+
 <template>
-  <!-- Using Bootstrap's Header template (starter code) -->
-  <!-- https://getbootstrap.com/docs/5.0/examples/headers/ -->
   <div class="container">
     <header class="d-flex justify-content-center py-3">
       <ul class="nav nav-pills">
         <li class="nav-item">
-          <a href="#" class="nav-link active" aria-current="page">Home (Week 4)</a>
+          <RouterLink to="/" class="nav-link" exact-active-class="active">
+            Home
+          </RouterLink>
         </li>
-        <li class="nav-item"><a href="#" class="nav-link">About</a></li>
-        <li class="nav-item"><a href="#" class="nav-link">Contact us</a></li>
+
+        <li v-if="isAuthenticated" class="nav-item">
+          <RouterLink to="/about" class="nav-link" active-class="active">
+            About
+          </RouterLink>
+        </li>
+
+        <li v-if="!isAuthenticated" class="nav-item">
+          <RouterLink to="/login" class="nav-link" active-class="active">
+            Login
+          </RouterLink>
+        </li>
+
+        <li v-else class="nav-item">
+          <button type="button" class="nav-link" @click="handleLogout">
+            Logout
+          </button>
+        </li>
       </ul>
     </header>
   </div>
 </template>
-
 <style scoped>
 .b-example-divider {
   height: 3rem;
@@ -30,6 +57,7 @@
   background-color: var(--bs-dark);
   border-color: var(--bs-gray);
 }
+
 .form-control-dark:focus {
   color: #fff;
   background-color: var(--bs-dark);
