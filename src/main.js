@@ -7,6 +7,7 @@ import router from './router'
 import PrimeVue from 'primevue/config'
 import Aura from '@primevue/themes/aura'
 
+import './firebase/init'
 
 const app = createApp(App)
 app.use(PrimeVue, { theme: { preset: Aura } })

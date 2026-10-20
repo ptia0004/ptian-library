@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
+import { registerLibraryUser } from '../auth'
 
 const formData = ref({
   username: '',
@@ -14,13 +15,32 @@ const formData = ref({
 })
 
 const submittedCards = ref([])
+const registerMessage = ref('')
+const registerError = ref('')
 
-const submitForm = () => {
+const submitForm = async () => {
   validateName(true)
   validatePassword(true)
-  if (!errors.value.username && !errors.value.password) {
+  validateConfirmPassword(true)
+  registerMessage.value = ''
+  registerError.value = ''
+
+  if (
+    errors.value.username ||
+    errors.value.password ||
+    errors.value.confirmPassword
+  ) {
+    return
+  }
+
+  try {
+    await registerLibraryUser({ ...formData.value })
     submittedCards.value.push({ ...formData.value })
+    registerMessage.value =
+      'Account created. You can now log in on the Login page with this username and password.'
     clearForm()
+  } catch (error) {
+    registerError.value = error.message
   }
 }
 
@@ -104,8 +124,14 @@ const checkReasonForFriend = () => {
         <h1 class="text-center">🗄️ W5. Library Registration Form</h1>
         <p class="text-center">
           This form now includes validation. Registered users are displayed in a data table below
-          (PrimeVue).
+          (PrimeVue) and can sign in on the Login page.
         </p>
+        <div v-if="registerMessage" class="alert alert-success">
+          {{ registerMessage }}
+        </div>
+        <div v-if="registerError" class="alert alert-danger">
+          {{ registerError }}
+        </div>
         <form @submit.prevent="submitForm">
           <div class="row mb-3">
             <div class="col-md-6 col-sm-6">

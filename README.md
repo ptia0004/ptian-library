@@ -22,6 +22,26 @@ npm install
 npm run dev
 ```
 
+### Weather API setup (Lab 10.2)
+
+The **Get Weather** navigation link opens `/WeatherCheck`. Enter a city name, such as
+`Melbourne,AU`, and click **Search** (or press Enter) to display its current weather.
+
+Add your OpenWeather API key directly to `src/views/WeatherView.vue`:
+
+```js
+const apikey = "your_api_key_here";
+```
+
+The key is intentionally blank initially. This page uses the `apikey` constant rather
+than `.env.local`. After a key is added, opening the page requests browser location
+permission so it can display the current weather at your location. You can also enter
+a city name and search manually.
+
+The page requests the [Current Weather API](https://openweathermap.org/api/current)
+and follows the course example to convert the returned temperature from Kelvin to
+Celsius. It shows the city, country, weather icon, temperature and description.
+
 ### Compile and Minify for Production
 
 ```sh

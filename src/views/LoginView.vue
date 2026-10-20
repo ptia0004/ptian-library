@@ -13,8 +13,8 @@ const accessWasDenied = computed(
     () => route.query.denied === 'true'
 )
 
-const handleLogin = () => {
-    const successful = login(username.value, password.value)
+const handleLogin = async () => {
+    const successful = await login(username.value, password.value)
 
     if (!successful) {
         router.push({ name: 'AccessDenied' })
@@ -36,6 +36,10 @@ const handleLogin = () => {
     <div class="container mt-5">
         <div class="col-md-6 offset-md-3">
             <h1>Member Login</h1>
+            <p class="text-secondary">
+                Use the username and password from the homepage registration form,
+                or the demo account <strong>member</strong> / <strong>library123</strong>.
+            </p>
 
             <div v-if="accessWasDenied" class="alert alert-danger">
                 Please log in before accessing the members area.

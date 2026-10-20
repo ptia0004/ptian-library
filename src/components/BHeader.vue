@@ -1,18 +1,18 @@
 <script setup>
 import { useRouter } from 'vue-router'
-import { isAuthenticated, logout } from '../auth'
+import { currentUser, isAuthenticated, logout } from '../auth'
 
 const router = useRouter()
 
-const handleLogout = () => {
-  logout()
-  router.push('/login')
+const handleLogout = async () => {
+  await logout()
+  router.push({ name: 'Logout' })
 }
 </script>
 
 <template>
   <div class="container">
-    <header class="d-flex justify-content-center py-3">
+    <header class="d-flex flex-wrap justify-content-center align-items-center py-3 gap-3">
       <ul class="nav nav-pills">
         <li class="nav-item">
           <RouterLink to="/" class="nav-link" exact-active-class="active">
@@ -31,13 +31,51 @@ const handleLogout = () => {
             Login
           </RouterLink>
         </li>
+        <li class="nav-item">
+          <router-link to="/getbookcount" class="nav-link" active-class="active">
+            Get Book Count
+          </router-link>
+        </li>
+        <li class="nav-item">
+          <RouterLink to="/WeatherCheck" class="nav-link" active-class="active">
+            Get Weather
+          </RouterLink>
+        </li>
+        <li class="nav-item">
+          <RouterLink to="/CountBookAPI" class="nav-link" active-class="active">
+            Count Book API
+          </RouterLink>
+        </li>
+        <li class="nav-item">
+          <RouterLink to="/GetAllBookAPI" class="nav-link" active-class="active">
+            Get All Book API
+          </RouterLink>
+        </li>
+        <li v-if="!isAuthenticated" class="nav-item">
+          <RouterLink to="/FireLogin" class="nav-link" active-class="active">
+            Firebase Login
+          </RouterLink>
+        </li>
+
+        <li v-if="!isAuthenticated" class="nav-item">
+          <RouterLink to="/FireRegister" class="nav-link" active-class="active">
+            Firebase Register
+          </RouterLink>
+        </li>
 
         <li v-else class="nav-item">
           <button type="button" class="nav-link" @click="handleLogout">
             Logout
           </button>
         </li>
+        <li class="nav-item">
+          <router-link to="/addbook" class="nav-link" active-class="active">Add Book</router-link>
+        </li>
       </ul>
+
+      <p v-if="currentUser" class="mb-0 small text-secondary">
+        {{ currentUser.email }} · role: {{ currentUser.role }}
+      </p>
     </header>
   </div>
 </template>
